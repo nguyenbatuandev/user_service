@@ -66,7 +66,7 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 	
 	authenticatedUser, err := h.userService.LoginUser(user)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, entity.ErrorResponse{Error: "Invalid email or password 3"})
+		c.JSON(http.StatusUnauthorized, entity.ErrorResponse{Error: err.Error()})
 		return
 	}
 
