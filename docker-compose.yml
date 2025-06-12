@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: user_service_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: user_service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - user_service_network
+
+  user_service:
+    build: .
+    container_name: user_service_app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # Database Config - ✅ Tên khớp với config.go
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=password123
+      - DB_NAME=user_service
+      - DB_SSLMODE=disable
+      
+      # JWT Config - ✅ Tên khớp với config.go
+      - JWT_SECRET=qwertyuiopiuytsdfghjkllkjhgfddfghjklkjhgfddfghjkkj
+      - JWT_EXPIRES_IN=24
+        # Server Config
+      - SERVER_PORT=8080
+      - GIN_MODE=release
+    depends_on:
+      - postgres
+    networks:
+      - user_service_network
+
+volumes:
+  postgres_data:
+
+networks:
+  user_service_network:
+    driver: bridge
